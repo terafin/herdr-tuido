@@ -1,0 +1,26 @@
+# herdr-tuido: Justin's Vikunja tasks (tui-do, https://github.com/sjwasko/tui-do) in a herdr split pane.
+# The bots keep writing to the same Vikunja through its MCP; the pane is the human view of it.
+id = "herdr-tuido"
+name = "herdr-tuido"
+version = "0.1.0"
+description = "Vikunja tasks (tui-do) in a herdr split pane."
+min_herdr_version = "0.9.0"
+platforms = ["linux", "macos"]
+
+# Downloads the pinned tui-do release for this platform and checks it against the hash pinned in
+# the script, so installing never trusts the release page alone.
+[[build]]
+platforms = ["linux", "macos"]
+command = ["/bin/sh", "scripts/fetch.sh"]
+
+[[panes]]
+id = "board"
+title = "Vikunja"
+placement = "split"
+command = ["/bin/sh", "scripts/run.sh"]
+
+[[actions]]
+id = "open"
+title = "Open Vikunja tasks"
+description = "Open tui-do in a split pane beside the current work (r syncs now, R syncs everything)."
+command = ["/bin/sh", "scripts/open.sh"]
