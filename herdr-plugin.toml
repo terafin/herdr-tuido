@@ -2,8 +2,8 @@
 # The bots keep writing to the same Vikunja through its MCP; the pane is the human view of it.
 id = "herdr-tuido"
 name = "herdr-tuido"
-version = "0.1.0"
-description = "Vikunja tasks (tui-do) in a herdr split pane."
+version = "0.2.0"
+description = "Vikunja tasks (tui-do) in a herdr pane that follows you across tabs and workspaces."
 min_herdr_version = "0.9.0"
 platforms = ["linux", "macos"]
 
@@ -19,8 +19,25 @@ title = "Vikunja"
 placement = "split"
 command = ["/bin/sh", "scripts/run.sh"]
 
+# One board per machine follows you: on every tab or workspace switch it moves into the focused
+# tab as a right-hand column without taking focus (never into herdr-mirror workspaces).
+[[startup]]
+command = ["/bin/sh", "scripts/follow.sh"]
+
+[[events]]
+on = "tab.focused"
+command = ["/bin/sh", "scripts/follow.sh"]
+
+[[events]]
+on = "workspace.focused"
+command = ["/bin/sh", "scripts/follow.sh"]
+
+[[events]]
+on = "tab.created"
+command = ["/bin/sh", "scripts/follow.sh"]
+
 [[actions]]
 id = "open"
-title = "Open Vikunja tasks"
-description = "Open tui-do in a split pane beside the current work (r syncs now, R syncs everything)."
-command = ["/bin/sh", "scripts/open.sh"]
+title = "Vikunja tasks: jump / hide / show"
+description = "Jump to the board; from inside it, hide it and stop following; when hidden, bring it back (r syncs now, R syncs everything)."
+command = ["/bin/sh", "scripts/toggle.sh"]
