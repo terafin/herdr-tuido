@@ -12,6 +12,7 @@ if [ -e "$STATE/off" ] || [ -z "$btab" ]; then
   id=$(board_id); [ -n "$id" ] && "$HERDR" plugin pane focus "$id" >/dev/null 2>&1
 elif [ "$cur" = "$id" ]; then
   touch "$STATE/off"
+  record_share "$id"
   "$HERDR" plugin pane close "$id" >/dev/null 2>&1
   rm -f "$STATE/pane"
 else

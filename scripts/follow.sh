@@ -13,8 +13,10 @@ btab=""; [ -n "$id" ] && btab=$(board_tab "$id")
 if [ -z "$btab" ]; then
   open_board "$cur" no-focus
 elif [ "$btab" != "$tab" ]; then
-  new=$("$HERDR" pane move "$id" --tab "$tab" --split right --target-pane "$cur" \
-         --ratio "$WIDTH_RATIO" --no-focus 2>/dev/null | json "d['result']['move_result']['pane']['pane_id']")
+  record_share "$id"
+  set -- $(target_for "$cur" "$id"); tgt="${1:-$cur}"; ratio="${2:-0.7}"
+  new=$("$HERDR" pane move "$id" --tab "$tab" --split right --target-pane "$tgt" \
+         --ratio "$ratio" --no-focus 2>/dev/null | json "d['result']['move_result']['pane']['pane_id']")
   # Moving to another workspace renumbers the pane; keep the id current.
   [ -n "$new" ] && printf '%s\n' "$new" > "$STATE/pane"
 fi

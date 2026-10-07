@@ -2,7 +2,7 @@
 # The bots keep writing to the same Vikunja through its MCP; the pane is the human view of it.
 id = "herdr-tuido"
 name = "herdr-tuido"
-version = "0.2.0"
+version = "0.3.0"
 description = "Vikunja tasks (tui-do) in a herdr pane that follows you across tabs and workspaces."
 min_herdr_version = "0.9.0"
 platforms = ["linux", "macos"]

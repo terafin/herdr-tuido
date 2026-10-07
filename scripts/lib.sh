@@ -2,7 +2,8 @@
 HERDR="${HERDR_BIN_PATH:-herdr}"
 STATE="${HERDR_PLUGIN_STATE_DIR:-$HOME/.local/state/herdr-tuido}"
 mkdir -p "$STATE"
-WIDTH_RATIO=0.7   # share kept by the pane to its left; the board gets the rest (~30%)
+DEFAULT_SHARE=0.3 # board width as a share of the tab, until you resize it (then yours is kept)
+LAYOUT="$(dirname "$0")/layout.py"
 
 json() { python3 -c "import json,sys; d=json.load(sys.stdin); print($1)" 2>/dev/null; }
 # The saved id if it still names a pane, else this plugin's pane by label + cwd (e.g. after herdr
@@ -28,9 +29,24 @@ lock() {
   fi
   trap 'rm -rf "$STATE/lock"' EXIT
 }
-open_board() { # open_board <target pane> <focus|no-focus>
+share() { s=$(cat "$STATE/share" 2>/dev/null); printf '%s\n' "${s:-$DEFAULT_SHARE}"; }
+layout() { "$HERDR" pane layout --pane "$1" 2>/dev/null; }
+# Remember the board's width (as a share of its tab) before it moves or hides, so a resize sticks.
+record_share() {
+  s=$(layout "$1" | python3 "$LAYOUT" record "$1")
+  [ -n "$s" ] && printf '%s\n' "$s" > "$STATE/share"
+}
+# Split the rightmost full-height pane of <pane>'s tab so the board gets its share of the tab.
+target_for() { layout "$1" | python3 "$LAYOUT" target "${2:-none}" "$(share)"; }
+fix_size() {
+  set -- "$1" $(layout "$1" | python3 "$LAYOUT" fix "$1" "$(share)")
+  [ -n "${2:-}" ] && "$HERDR" pane resize --pane "$1" --direction "$2" --amount "$3" >/dev/null 2>&1
+  return 0
+}
+open_board() { # open_board <pane in the tab> <focus|no-focus>
+  set -- "$1" "$2" $(target_for "$1")
   id=$("$HERDR" plugin pane open --plugin herdr-tuido --entrypoint board --placement split \
-        --direction right --target-pane "$1" "--$2" 2>/dev/null \
+        --direction right --target-pane "${3:-$1}" "--$2" 2>/dev/null \
         | json "d['result']['plugin_pane']['pane']['pane_id']")
-  [ -n "$id" ] && printf '%s\n' "$id" > "$STATE/pane"
+  [ -n "$id" ] && printf '%s\n' "$id" > "$STATE/pane" && fix_size "$id"
 }
